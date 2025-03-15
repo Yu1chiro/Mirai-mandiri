@@ -1,0 +1,215 @@
+import express from 'express';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
+import { getDatabase } from 'firebase-admin/database';
+
+dotenv.config();
+const app = express();
+const __dirname = path.resolve();
+
+// Inisialisasi Firebase Admin
+const serviceAccount = {
+  type: "service_account",
+  project_id: process.env.FIREBASE_PROJECT_ID,
+  private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+  private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+  client_email: process.env.FIREBASE_CLIENT_EMAIL,
+  client_id: process.env.FIREBASE_CLIENT_ID,
+  auth_uri: "https://accounts.google.com/o/oauth2/auth",
+  token_uri: "https://oauth2.googleapis.com/token",
+  auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+  client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL
+};
+
+const firebaseAdmin = initializeApp({
+  credential: cert(serviceAccount),
+  databaseURL: process.env.FIREBASE_DATABASE_URL
+});
+
+// Middleware untuk cache control
+app.use((req, res, next) => {
+  res.set({
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    'Surrogate-Control': 'no-store'
+  });
+  next();
+});
+
+// Middleware untuk verifikasi autentikasi
+const authMiddleware = async (req, res, next) => {
+  try {
+    const sessionCookie = req.cookies.session || '';
+    if (!sessionCookie) {
+      return res.redirect('/sign');
+    }
+
+    const decodedClaim = await getAuth().verifySessionCookie(sessionCookie, true);
+    const userRecord = await getAuth().getUser(decodedClaim.uid);
+
+    // Verifikasi role admin
+    const db = getDatabase();
+    const adminRef = db.ref(`admin/${userRecord.uid}`);
+    const adminSnapshot = await adminRef.once('value');
+    
+    if (!adminSnapshot.exists() || adminSnapshot.val().role !== 'admin') {
+      return res.redirect('/sign');
+    }
+
+    req.user = userRecord;
+    next();
+  } catch (error) {
+    console.error('Verifikasi sesi gagal:', error);
+    res.redirect('/sign');
+  }
+};
+
+// Middleware untuk parsing cookie
+app.use(express.json());
+app.use(cookieParser());
+// Endpoint untuk firebase config
+app.get('/firebase-config', (req, res) => {
+  const firebaseConfig = {
+    apiKey: process.env.FIREBASE_API_KEY,
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.FIREBASE_APP_ID,
+    measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+  };
+
+  res.json(firebaseConfig);
+});
+
+// Endpoint untuk login
+app.post('/sessionLogin', async (req, res) => {
+  const idToken = req.body.idToken;
+  try {
+    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 hari
+    const sessionCookie = await getAuth().createSessionCookie(idToken, { expiresIn });
+    
+    res.cookie('session', sessionCookie, { 
+      maxAge: expiresIn, 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    });
+    
+    res.json({ status: 'success' });
+  } catch (error) {
+    console.error('Kesalahan membuat sesi:', error);
+    res.status(401).json({ status: 'error', message: 'Unauthorized' });
+  }
+});
+
+// Endpoint untuk logout
+app.post('/sessionLogout', (req, res) => {
+  res.clearCookie('session');
+  res.json({ status: 'success' });
+});
+
+// Pengaturan static files
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res, path) => {
+    res.set({
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+  }
+}));
+
+// Route untuk halaman publik
+app.get('/signup', (req, res) => {
+  res.redirect('/Auth/signup');
+});
+
+app.get('/Auth/signup', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/Auth', 'signup.html'));
+});
+
+
+app.get('/sign', (req, res) => {
+  res.redirect('/Auth/sign');
+});
+app.get('/Auth/sign', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/Auth', 'sign.html'));
+});
+// Route navigation
+app.get('/about', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'about.html'));
+});
+app.get('/advantages', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'advantages.html'));
+});
+app.get('/courses', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'courses.html'));
+});
+
+// Route middleware auth
+app.get('/admin', authMiddleware, (req, res) => {
+  res.redirect('/Dashboard/admin');
+});
+
+app.get('/Dashboard/admin', authMiddleware, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/Dashboard', 'admin.html'));
+});
+// 
+app.get('/testimoni-manage', authMiddleware, (req, res) => {
+  res.redirect('/Dashboard/testimoni-manage');
+});
+
+app.get('/Dashboard/testimoni-manage', authMiddleware, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/Dashboard', 'testimoni-manage.html'));
+});
+// 
+app.get('/tutor', authMiddleware, (req, res) => {
+  res.redirect('/Dashboard/tutor');
+});
+
+app.get('/Dashboard/tutor', authMiddleware, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/Dashboard', 'tutor.html'));
+});
+
+
+
+// Handler untuk rute yang tidak ditemukan - moved before app.listen()
+app.use((req, res) => {
+  res.status(404).send(`
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 Not Found</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[url('/img/pixel.jpg')] bg-cover bg-no-repeat flex items-center justify-center min-h-screen">
+  <div class="bg-gradient-to-r from-[#0a387f] to-[#1C1678] animate-card text-white rounded-lg shadow-md p-6 mx-auto max-w-lg">
+    <h1 class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-[hsl(42,85%,65%)] to-[hsl(42,80%,85%)] text-center text-2xl mb-4 font-custom">
+      404 Page Not Found
+    </h1>
+    <p class="text-center mb-6">
+      Sepertinya halaman yang Anda cari tidak tersedia
+    </p>
+    <div class="flex justify-center">
+      <a href="/" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition">
+        Kembali ke Beranda
+      </a>
+    </div>
+  </div>
+</body>
+
+</html>
+    `);
+});
+
+// Start the server
+app.listen(3000, () => console.log('Server running at http://localhost:3000'));

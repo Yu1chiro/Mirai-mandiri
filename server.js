@@ -5,6 +5,9 @@ import dotenv from 'dotenv';
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getDatabase } from 'firebase-admin/database';
+import {rateLimit} from 'express-rate-limit';
+import {RateLimiterMemory} from 'rate-limiter-flexible';
+import { body, validationResult } from 'express-validator';
 
 dotenv.config();
 const app = express();
@@ -86,33 +89,123 @@ app.get('/firebase-config', (req, res) => {
   res.json(firebaseConfig);
 });
 
-// Endpoint untuk login
-app.post('/sessionLogin', async (req, res) => {
-  const idToken = req.body.idToken;
-  try {
-    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 hari
-    const sessionCookie = await getAuth().createSessionCookie(idToken, { expiresIn });
-    
-    res.cookie('session', sessionCookie, { 
-      maxAge: expiresIn, 
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax'
+// Konfigurasi rate-limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 menit
+  max: 5, // Maksimal 5 percobaan login per IP
+  message: 'Terlalu banyak percobaan login, silakan coba lagi setelah 15 menit.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      status: 'error',
+      message: 'Terlalu banyak percobaan login, silakan coba lagi setelah 15 menit.',
+      retryAfter: 15 * 60, // Waktu tunggu dalam detik
     });
-    
-    res.json({ status: 'success' });
-  } catch (error) {
-    console.error('Kesalahan membuat sesi:', error);
-    res.status(401).json({ status: 'error', message: 'Unauthorized' });
-  }
+  },
 });
 
+// Rate-limiter berbasis IP
+const ipLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 menit
+  max: 5, // Maksimal 5 percobaan login per IP
+  message: 'Terlalu banyak percobaan login, silakan coba lagi setelah 15 menit.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      status: 'error',
+      message: 'Terlalu banyak percobaan login, silakan coba lagi setelah 15 menit.',
+      retryAfter: 15 * 60, // Waktu tunggu dalam detik
+    });
+  },
+});
+
+// Rate-limiter berbasis email
+const emailLimiter = new RateLimiterMemory({
+  points: 5, // Maksimal 5 percobaan
+  duration: 15 * 60, // 15 menit
+});
+
+app.post('/sessionLogin', ipLimiter, async (req, res) => {
+  const { idToken, email } = req.body;
+
+  try {
+    // Cek rate-limit berbasis email
+    await emailLimiter.consume(email);
+
+    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 hari
+    const sessionCookie = await getAuth().createSessionCookie(idToken, { expiresIn });
+
+    res.cookie('session', sessionCookie, {
+      maxAge: expiresIn,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
+    res.json({ status: 'success' });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('Kesalahan membuat sesi:', error);
+      res.status(401).json({ status: 'error', message: 'Unauthorized' });
+    } else {
+      // Jika rate-limit terlampaui
+      res.status(429).json({
+        status: 'error',
+        message: 'Terlalu banyak percobaan login, silakan coba lagi setelah 15 menit.',
+        retryAfter: 15 * 60, // Waktu tunggu dalam detik
+      });
+    }
+  }
+});
 // Endpoint untuk logout
 app.post('/sessionLogout', (req, res) => {
   res.clearCookie('session');
   res.json({ status: 'success' });
 });
 
+// sanitazion middleware 
+const validateCheckoutData = [
+  body('namaLengkap').trim().notEmpty().withMessage('Nama lengkap harus diisi').escape(),
+  body('umur').isInt({ min: 1 }).withMessage('Umur harus berupa angka positif').toInt(),
+  body('jenjangPendidikan').trim().notEmpty().withMessage('Jenjang pendidikan harus diisi').escape(),
+  body('whatsapp').trim().notEmpty().withMessage('Nomor WhatsApp harus diisi').escape(),
+  body('basicJepang').optional().trim().escape(),
+  body('sertifikatJlpt').optional().trim().escape(),
+  body('alasan').trim().notEmpty().withMessage('Alasan harus diisi').escape(),
+];
+
+// Endpoint untuk menyimpan data checkout
+app.post('/saveCheckout', validateCheckoutData, (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { namaLengkap, umur, jenjangPendidikan, whatsapp, basicJepang, sertifikatJlpt, alasan, programTitle } = req.body;
+
+  // Simpan data ke Firebase
+  const checkoutRef = ref(database, 'checkout');
+  const newCheckoutRef = push(checkoutRef);
+
+  set(newCheckoutRef, {
+    namaLengkap,
+    umur,
+    jenjangPendidikan,
+    whatsapp,
+    basicJepang,
+    sertifikatJlpt,
+    alasan,
+    programTitle,
+    createdAt: new Date().toISOString()
+  }).then(() => {
+    res.json({ status: 'success', message: 'Thankyou kami akan menghubungi anda via whatsapp' });
+  }).catch((error) => {
+    console.error("Error saving checkout data:", error);
+    res.status(500).json({ status: 'error', message: 'Anda terdeteksi melakukan hal tidak etis, mohon isi form dengan fromat semestinya' });
+  });
+});
 // Pengaturan static files
 app.use(express.static(path.join(__dirname, 'public'), {
   etag: false,
@@ -126,14 +219,6 @@ app.use(express.static(path.join(__dirname, 'public'), {
   }
 }));
 
-// Route untuk halaman publik
-app.get('/signup', (req, res) => {
-  res.redirect('/Auth/signup');
-});
-
-app.get('/Auth/signup', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/Auth', 'signup.html'));
-});
 
 
 app.get('/sign', (req, res) => {
@@ -191,22 +276,75 @@ app.use((req, res) => {
   <title>404 Not Found</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[url('/img/pixel.jpg')] bg-cover bg-no-repeat flex items-center justify-center min-h-screen">
-  <div class="bg-gradient-to-r from-[#0a387f] to-[#1C1678] animate-card text-white rounded-lg shadow-md p-6 mx-auto max-w-lg">
-    <h1 class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-[hsl(42,85%,65%)] to-[hsl(42,80%,85%)] text-center text-2xl mb-4 font-custom">
-      404 Page Not Found
-    </h1>
-    <p class="text-center mb-6">
-      Sepertinya halaman yang Anda cari tidak tersedia
-    </p>
-    <div class="flex justify-center">
-      <a href="/" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition">
-        Kembali ke Beranda
-      </a>
+<body class="bg-[url('/img/bg.jpg')] bg-cover bg-no-repeat flex items-center justify-center min-h-screen">
+  <div class="bg-gradient-to-r from-[#0a387f] to-[#1C1678] animate-card text-white rounded-lg shadow-2xl p-8 mx-auto max-w-lg relative overflow-hidden">
+    <!-- Logo -->
+    <div class="flex justify-center mb-6">
+      <img src="https://ucarecdn.com/61b8e223-d2bd-4b49-b5ca-702959bffc7a/Screenshot20250311023342.png" alt="Logo" class="h-16 rounded-full">
+    </div>
+
+    <!-- Animated Background Element -->
+    <div class="absolute inset-0 z-0">
+      <div class="absolute -top-20 -left-20 w-40 h-40 bg-gradient-to-r from-[#ffffff22] to-[#ffffff11] rounded-full animate-float"></div>
+      <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-gradient-to-r from-[#ffffff22] to-[#ffffff11] rounded-full animate-float-delay"></div>
+    </div>
+
+    <!-- Content -->
+    <div class="relative z-10">
+      <h1 class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-[hsl(42,85%,65%)] to-[hsl(42,80%,85%)] text-center text-4xl mb-4 font-custom">
+        404 Page Not Found
+      </h1>
+      <p class="text-center text-lg mb-6">
+        Sepertinya halaman yang Anda cari tidak tersedia
+      </p>
+      <div class="flex justify-center">
+        <a href="/" class="px-6 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition transform hover:scale-105">
+          Kembali ke Beranda
+        </a>
+      </div>
     </div>
   </div>
-</body>
 
+  <!-- Custom Animations -->
+  <style>
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+    @keyframes float-delay {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+    .animate-float {
+      animation: float 6s ease-in-out infinite;
+    }
+    .animate-float-delay {
+      animation: float-delay 6s ease-in-out infinite;
+      animation-delay: 2s;
+    }
+    .animate-card {
+      animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</body>
 </html>
     `);
 });

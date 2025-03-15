@@ -133,136 +133,139 @@ document.getElementById('course-fetch').addEventListener('click', (event) => {
 
 // Fungsi untuk menampilkan form checkout
 function showCheckoutForm(programTitle) {
-  Swal.fire({
-    html: `
-    <form id="checkoutForm" class="bg-white p-8 rounded-2xl shadow-xl space-y-6">
-  <h2 class="text-lg font-bold text-gray-800 mb-6">Form Pendaftaran ${programTitle} </h2>
-
-  <!-- Nama Lengkap -->
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-2 text-start">Nama Lengkap</label>
-    <input id="nama-lengkap" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" type="text" required>
-  </div>
-
-  <!-- Umur -->
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-2 text-start">Umur</label>
-    <input id="umur" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" type="number" required>
-  </div>
-
-  <!-- Jenjang Pendidikan -->
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-2 text-start">Jenjang Pendidikan</label>
-    <select id="jenjang-pendidikan" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none appearance-none bg-white" required>
-      <option value="">Pilih</option>
-      <option value="SMA/SMK">SMA/SMK</option>
-      <option value="Diploma">Diploma</option>
-      <option value="Sarjana">Sarjana</option>
-      <option value="Lainnya">Lainnya</option>
-    </select>
-  </div>
-
-  <!-- Nomor WhatsApp -->
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-2 text-start">Nomor WhatsApp</label>
-    <input id="whatsapp" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" type="tel" required>
-  </div>
-
-  <!-- Basic Bahasa Jepang -->
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-2 text-start">Apakah sudah memiliki basic bahasa Jepang?</label>
-    <select id="basic-jepang" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none">
-      <option value="Sudah">Sudah</option>
-      <option value="Belum">Belum</option>
-    </select>
-  </div>
-
-  <!-- Sertifikat JLPT -->
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-2 text-start">Apakah memiliki sertifikat JLPT?</label>
-    <select id="sertifikat-jlpt" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none">
-      <option value="Ya">Ya</option>
-      <option value="Tidak">Tidak</option>
-    </select>
-  </div>
-
-  <!-- Alasan Bergabung -->
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-2 text-start">Alasan ingin bergabung program ini</label>
-    <textarea id="alasan" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" rows="4" required></textarea>
-  </div>
-
-  <!-- Tombol Submit -->
- 
-</form>
-    `,
-    focusConfirm: false,
-    showCancelButton: true,
-    confirmButtonText: 'Submit',
-    cancelButtonText: 'Batal',
-    preConfirm: () => {
-      const namaLengkap = document.getElementById('nama-lengkap').value;
-      const umur = document.getElementById('umur').value;
-      const jenjangPendidikan = document.getElementById('jenjang-pendidikan').value;
-      const whatsapp = document.getElementById('whatsapp').value;
-      const basicJepang = document.getElementById('basic-jepang').value;
-      const sertifikatJlpt = document.getElementById('sertifikat-jlpt').value;
-      const alasan = document.getElementById('alasan').value;
-
-      if (!namaLengkap || !umur || !jenjangPendidikan || !whatsapp || !alasan) {
-        Swal.showValidationMessage('Harap isi semua field yang wajib');
-        return false;
+    Swal.fire({
+        html: `
+        <form id="checkoutForm" class="p-8 space-y-6">
+      <h2 class="text-lg font-bold text-gray-800 mb-6">Form Pendaftaran ${programTitle} </h2>
+    
+      <!-- Nama Lengkap -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2 text-start">Nama Lengkap</label>
+        <input id="nama-lengkap" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" type="text" required>
+      </div>
+    
+      <!-- Umur -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2 text-start">Umur</label>
+        <input id="umur" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" type="number" required>
+      </div>
+    
+      <!-- Jenjang Pendidikan -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2 text-start">Jenjang Pendidikan</label>
+        <select id="jenjang-pendidikan" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none appearance-none bg-white" required>
+          <option value="">Pilih</option>
+          <option value="SMA/SMK">SMA/SMK</option>
+          <option value="Diploma">Diploma</option>
+          <option value="Sarjana">Sarjana</option>
+          <option value="Lainnya">Lainnya</option>
+        </select>
+      </div>
+    
+      <!-- Nomor WhatsApp -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2 text-start">Nomor WhatsApp</label>
+        <input id="whatsapp" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" type="number" required>
+      </div>
+    
+      <!-- Basic Bahasa Jepang -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2 text-start">Apakah sudah memiliki basic bahasa Jepang?</label>
+        <select id="basic-jepang" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none">
+          <option value="">Pilih</option>
+          <option value="Sudah">Sudah</option>
+          <option value="Belum">Belum</option>
+        </select>
+      </div>
+    
+      <!-- Sertifikat JLPT -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2 text-start">Apakah memiliki sertifikat JLPT?</label>
+        <select id="sertifikat-jlpt" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none">
+          <option value="">Pilih</option>
+          <option value="Ya">Ya</option>
+          <option value="Tidak">Tidak</option>
+        </select>
+      </div>
+    
+      <!-- Alasan Bergabung -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2 text-start">Alasan ingin bergabung program ini</label>
+        <textarea id="alasan" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none" rows="4" required></textarea>
+      </div>
+    
+      <!-- Tombol Submit -->
+     
+    </form>
+        `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Submit',
+      cancelButtonText: 'Batal',
+      preConfirm: () => {
+        const namaLengkap = document.getElementById('nama-lengkap').value;
+        const umur = document.getElementById('umur').value;
+        const jenjangPendidikan = document.getElementById('jenjang-pendidikan').value;
+        const whatsapp = document.getElementById('whatsapp').value;
+        const basicJepang = document.getElementById('basic-jepang').value;
+        const sertifikatJlpt = document.getElementById('sertifikat-jlpt').value;
+        const alasan = document.getElementById('alasan').value;
+  
+        if (!namaLengkap || !umur || !jenjangPendidikan || !whatsapp || !alasan) {
+          Swal.showValidationMessage('Harap isi semua field yang wajib');
+          return false;
+        }
+  
+        return {
+          namaLengkap,
+          umur,
+          jenjangPendidikan,
+          whatsapp,
+          basicJepang,
+          sertifikatJlpt,
+          alasan,
+          programTitle
+        };
       }
-
-      return {
-        namaLengkap,
-        umur,
-        jenjangPendidikan,
-        whatsapp,
-        basicJepang,
-        sertifikatJlpt,
-        alasan,
-        programTitle
-      };
-    }
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const checkoutData = result.value;
-      saveCheckoutData(checkoutData);
-    }
-  });
-}
-
-// Fungsi untuk menyimpan data checkout ke Firebase
-function saveCheckoutData(data) {
-  const checkoutRef = ref(database, 'checkout');
-  const newCheckoutRef = push(checkoutRef);
-
-  set(newCheckoutRef, {
-    namaLengkap: data.namaLengkap,
-    umur: data.umur,
-    jenjangPendidikan: data.jenjangPendidikan,
-    whatsapp: data.whatsapp,
-    basicJepang: data.basicJepang,
-    sertifikatJlpt: data.sertifikatJlpt,
-    alasan: data.alasan,
-    programTitle: data.programTitle,
-    createdAt: new Date().toISOString()
-  }).then(() => {
-    Swal.fire({
-      icon: 'success',
-      title: 'Thankyou !',
-      text: 'Kami akan menghubungi anda via whatsapp untuk informasi lebih lanjut',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const checkoutData = result.value;
+  
+        // Kirim data ke endpoint /saveCheckout
+        fetch('/saveCheckout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(checkoutData),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            Swal.fire({
+              icon: 'success',
+              title: 'Thankyou !',
+              text: 'Kami akan menghubungi anda via whatsapp untuk informasi lebih lanjut',
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Sending denied!',
+              text: 'Anda terdeteksi melakukan hal tidak etis, mohon isi form dengan fromat semestinya'
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Error saving checkout data:", error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Sending Denied!',
+            text: 'Anda terdeteksi melakukan hal tidak etis, mohon isi form dengan fromat semestinya'
+          });
+        });
+      }
     });
-  }).catch((error) => {
-    console.error("Error saving checkout data:", error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Gagal',
-      text: 'Terjadi kesalahan saat menyimpan data checkout.'
-    });
-  });
-}
+  }
 
 // Fungsi untuk menghasilkan bintang rating
 function generateStarRating(rating) {

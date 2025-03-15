@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LPK Mirai Mandiri</title>
+    <link rel="shortcut icon" href="https://ucarecdn.com/61b8e223-d2bd-4b49-b5ca-702959bffc7a/Screenshot20250311023342.png" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -283,6 +284,34 @@ mobileMenu.querySelectorAll('a').forEach((link) => {
             </div>
         </div>
     </section>
+    <section id="alumni" class="py-20 bg-blue-50 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Alumni LPK Mirai Mandiri</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                   Apa kata Mereka?
+                </p>
+                <div class="w-20 h-1 bg-blue-600 mx-auto mt-4"></div>
+            </div>
+            
+            <div id="alumni-card" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <img src="" alt="Alumni Image" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-gray-800">Nama Alumni</h3>
+                        <p class="text-sm text-gray-600 mt-2"><strong><i class="fa-solid fa-building me-2 text-lg"></i>Bidang Pekerjaan:</strong> </p>
+                        <p class="text-sm text-gray-600"><strong><i class="fa-solid fa-location-dot me-2 text-lg"></i> Penempatan Kerja:</strong> </p>
+                        <p class="text-sm text-gray-600"><strong><i class="fa-solid fa-calendar me-2 text-lg"></i> Tahun Berangkat:</strong> </p>
+                        <p class="text-sm text-gray-600 mt-4">Deskripsi </p>
+                    </div>
+                </div>
+                <!-- next -->
+            </div>
+            
+            </div>
+        </div>
+    </section>
     <footer class="bg-gray-900 text-white">
         <!-- Main Footer Content -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -327,6 +356,8 @@ mobileMenu.querySelectorAll('a').forEach((link) => {
             </footer>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script defer type="module" src="/Frontservices/course.js"></script>
+    <script defer type="module" src="/Frontservices/get.js"></script>
+    <script defer type="module" src="/Frontservices/alumni-fetch.js"></script>
     <script defer type="module" src="/Frontservices/tutor-fetch.js"></script>
     </body>
     </html>

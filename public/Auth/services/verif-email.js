@@ -4,7 +4,7 @@ import { getAuth, sendEmailVerification } from 'https://www.gstatic.com/firebase
 // Fungsi untuk mendapatkan konfigurasi Firebase
 async function getFirebaseConfig() {
   try {
-    const response = await fetch('/firebase-config'); // Pastikan endpoint ini benar
+    const response = await fetch('/auth-config'); // Pastikan endpoint ini benar
     if (!response.ok) throw new Error('Failed to load Firebase config');
     return response.json();
   } catch (error) {

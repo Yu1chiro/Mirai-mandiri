@@ -4,7 +4,7 @@ import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/fir
 // Mendapatkan konfigurasi Firebase dari server
 async function getFirebaseConfig() {
   try {
-    const response = await fetch('/firebase-config');
+    const response = await fetch('/auth-config');
     if (!response.ok) throw new Error('Failed to load Firebase config');
     return response.json();
   } catch (error) {
@@ -82,6 +82,13 @@ getFirebaseConfig().then(firebaseConfig => {
           throw new Error('Gagal membuat sesi');
         }
       }
+      fetch('/firebase-config', {
+        method: 'GET',
+        credentials: 'include', // Pastikan cookie dikirim
+      })
+      .then(response => response.json())
+      .then(data => console.log(data))
+      .catch(error => console.error('Error:', error));
   
       // Jika email telah diverifikasi dan session berhasil dibuat, arahkan ke Dashboard
       Swal.close(); // Hentikan animasi loading

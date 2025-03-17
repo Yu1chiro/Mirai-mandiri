@@ -48,7 +48,7 @@ const authMiddleware = async (req, res, next) => {
   try {
     const sessionCookie = req.cookies.session || '';
     if (!sessionCookie) {
-      return res.redirect('/sign');
+      return res.redirect('/403');
     }
 
     const decodedClaim = await getAuth().verifySessionCookie(sessionCookie, true);
@@ -60,14 +60,14 @@ const authMiddleware = async (req, res, next) => {
     const adminSnapshot = await adminRef.once('value');
     
     if (!adminSnapshot.exists() || adminSnapshot.val().role !== 'admin') {
-      return res.redirect('/sign');
+      return res.redirect('/403');
     }
 
     req.user = userRecord;
     next();
   } catch (error) {
     console.error('Verifikasi sesi gagal:', error);
-    res.redirect('/sign');
+    res.redirect('/403');
   }
 };
 
@@ -75,7 +75,39 @@ const authMiddleware = async (req, res, next) => {
 app.use(express.json());
 app.use(cookieParser());
 // Endpoint untuk firebase config
-app.get('/firebase-config', (req, res) => {
+// Middleware untuk melindungi endpoint /firebase-config
+const protectFirebaseConfig = async (req, res, next) => {
+  try {
+    const sessionCookie = req.cookies.session || '';
+    if (!sessionCookie) {
+      // Redirect ke route /403
+      return res.redirect('/403');
+    }
+
+    // Verifikasi session cookie menggunakan Firebase Admin SDK
+    const decodedClaims = await getAuth().verifySessionCookie(sessionCookie, true);
+    const userRecord = await getAuth().getUser(decodedClaims.uid);
+
+    // Verifikasi role admin (opsional, jika diperlukan)
+    const db = getDatabase();
+    const adminRef = db.ref(`admin/${userRecord.uid}`);
+    const adminSnapshot = await adminRef.once('value');
+
+    if (!adminSnapshot.exists() || adminSnapshot.val().role !== 'admin') {
+      // Redirect ke route /403
+      return res.redirect('/403');
+    }
+
+    // Jika verifikasi berhasil, lanjutkan ke endpoint
+    req.user = userRecord;
+    next();
+  } catch (error) {
+    console.error('Error verifying session cookie:', error);
+    // Redirect ke route /403
+    res.redirect('/403');
+  }
+};
+app.get('/firebase', protectFirebaseConfig, (req, res) => {
   const firebaseConfig = {
     apiKey: process.env.FIREBASE_API_KEY,
     authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -87,6 +119,19 @@ app.get('/firebase-config', (req, res) => {
   };
 
   res.json(firebaseConfig);
+});
+app.get('/auth-config', (req, res) => {
+  const firebaseClientConfig = {
+    apiKey: process.env.FIREBASE_API_KEY,
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.FIREBASE_APP_ID,
+    measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+  };
+
+  res.json(firebaseClientConfig);
 });
 
 // Konfigurasi rate-limiting
@@ -220,8 +265,11 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 
-
-app.get('/Auth/sign', (req, res) => {
+// denied access config
+app.get('/403', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', '403.html'));
+});
+app.get('/sign', (req, res) => {
   res.redirect('/Auth/sign');
 });
 app.get('/Auth/sign', (req, res) => {
@@ -246,7 +294,7 @@ app.get('/courses', (req, res) => {
 });
 
 // Route middleware auth
-app.get('/Dashboard/admin', authMiddleware, (req, res) => {
+app.get('/admin', authMiddleware, (req, res) => {
   res.redirect('/Dashboard/admin');
 });
 

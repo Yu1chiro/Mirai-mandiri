@@ -7,7 +7,7 @@ let database;
 // Fungsi untuk inisialisasi Firebase
 async function initializeFirebase() {
   try {
-    const response = await fetch('/firebase-config');
+    const response = await fetch('/firebase');
     const firebaseConfig = await response.json();
     firebaseApp = initializeApp(firebaseConfig);
     database = getDatabase(firebaseApp);

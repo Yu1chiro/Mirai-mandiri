@@ -3,7 +3,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebas
 
 async function getFirebaseConfig() {
   try {
-    const response = await fetch('/firebase-config');
+    const response = await fetch('/auth-config');
     if (!response.ok) throw new Error('Failed to load Firebase config');
     return response.json();
   } catch (error) {

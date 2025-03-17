@@ -233,7 +233,6 @@ async function showAddProgramForm() {
         icon: 'success',
         title: 'Berhasil',
         text: 'Program berhasil ditambahkan',
-        timer: 1500
       });
     } catch (error) {
       console.error("Error adding program:", error);

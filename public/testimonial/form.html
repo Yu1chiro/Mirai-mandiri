@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testimonial Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Intro.js CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css">
+
+<!-- Intro.js JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
+</head>
+<body style="background: url('/img/bg.jpg');" class="bg-cover bg-center flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
+        <div class="flex justify-center mb-3">
+            <img src="https://ucarecdn.com/61b8e223-d2bd-4b49-b5ca-702959bffc7a/Screenshot20250311023342.png" width="150px" class="h-auto rounded-full me-5" alt="">
+        </div>
+        <p class="text-gray-700 font-medium mb-5 text-center">Yuk berikan pengalaman kalian selama belajar di LPK Mirai Mandiri dan kesan kalian saat kerja dijepang</p>
+        <form id="testimonial-form">
+            <div class="mb-3">
+                <label class="block text-gray-700 text-sm font-bold mb-1" for="name">
+                    Name
+                </label>
+                <input name="name" class="appearance-none border focus:ring-2 rounded w-full py-2 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm" id="name" type="text" placeholder="Your Name">
+            </div>
+            <div class="mb-3">
+                <label class="block text-gray-700 text-sm font-bold mb-1" for="thumbnail">
+                    Thumbnail Link
+                </label>
+                <input name="thumbnail" class="appearance-none border focus:ring-2 rounded w-full py-2 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm" id="thumbnail" type="url" placeholder="upload foto kalian di https://app.uploadcare.com/ dan masukkan link foto kalian di input ini">
+            </div>
+            <div class="mb-3">
+                <label class="block text-gray-700 text-sm font-bold mb-1" for="bidang">
+                    Bidang
+                </label>
+                <input name="bidang" class="appearance-none border focus:ring-2 rounded w-full py-2 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm" id="bidang" type="text" placeholder="Your Field">
+            </div>
+            <div class="mb-3">
+                <label class="block text-gray-700 text-sm font-bold mb-1" for="lokasi">
+                    Lokasi
+                </label>
+                <input name="lokasi" class="appearance-none border focus:ring-2 rounded w-full py-2 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm" id="lokasi" type="text" placeholder="Location">
+            </div>
+            <div class="mb-3">
+                <label class="block text-gray-700 text-sm font-bold mb-1" for="tahun">
+                    Tahun
+                </label>
+                <input name="tahun" class="appearance-none border focus:ring-2 rounded w-full py-2 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm" id="tahun" type="text" placeholder="Year">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-1" for="pesan">
+                    Pesan
+                </label>
+                <textarea name="pesan" class="appearance-none border focus:ring-2 rounded w-full py-2 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm" id="pesan" placeholder="Your Message"></textarea>
+            </div>
+            <div class="flex items-center justify-between">
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded focus:outline-none focus:shadow-outline text-sm" type="submit">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+    <script type="module" src="/testimonial/form.js"></script>
+</body>
+</html>

@@ -227,6 +227,13 @@ app.get('/sign', (req, res) => {
 app.get('/Auth/sign', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/Auth', 'sign.html'));
 });
+// testimonial
+app.get('/form', (req, res) => {
+  res.redirect('/testimonial/form');
+});
+app.get('/testimonial/form', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/testimonial', 'form.html'));
+});
 // Route navigation
 app.get('/about', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'about.html'));
@@ -261,6 +268,14 @@ app.get('/tutor', authMiddleware, (req, res) => {
 
 app.get('/Dashboard/tutor', authMiddleware, (req, res) => {
   res.sendFile(path.join(__dirname, 'public/Dashboard', 'tutor.html'));
+});
+// statistc
+app.get('/statistic', authMiddleware, (req, res) => {
+  res.redirect('/Dashboard/statistic');
+});
+
+app.get('/Dashboard/statistic', authMiddleware, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/Dashboard', 'statistic.html'));
 });
 
 

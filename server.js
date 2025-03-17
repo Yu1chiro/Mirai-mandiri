@@ -221,7 +221,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
 
 
 
-app.get('/sign', (req, res) => {
+app.get('/Auth/sign', (req, res) => {
   res.redirect('/Auth/sign');
 });
 app.get('/Auth/sign', (req, res) => {
@@ -246,7 +246,7 @@ app.get('/courses', (req, res) => {
 });
 
 // Route middleware auth
-app.get('/admin', authMiddleware, (req, res) => {
+app.get('/Dashboard/admin', authMiddleware, (req, res) => {
   res.redirect('/Dashboard/admin');
 });
 

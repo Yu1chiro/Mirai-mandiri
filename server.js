@@ -134,7 +134,7 @@ app.post('/sessionLogin', ipLimiter, async (req, res) => {
     // Cek rate-limit berbasis email
     await emailLimiter.consume(email);
 
-    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 hari
+    const expiresIn = 60 * 60 * 24 * 1 * 1000; // 1
     const sessionCookie = await getAuth().createSessionCookie(idToken, { expiresIn });
 
     res.cookie('session', sessionCookie, {

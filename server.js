@@ -76,38 +76,38 @@ app.use(express.json());
 app.use(cookieParser());
 // Endpoint untuk firebase config
 // Middleware untuk melindungi endpoint /firebase-config
-const protectFirebaseConfig = async (req, res, next) => {
-  try {
-    const sessionCookie = req.cookies.session || '';
-    if (!sessionCookie) {
-      // Redirect ke route /403
-      return res.redirect('/403');
-    }
+// const protectFirebaseConfig = async (req, res, next) => {
+//   try {
+//     const sessionCookie = req.cookies.session || '';
+//     if (!sessionCookie) {
+//       // Redirect ke route /403
+//       return res.redirect('/403');
+//     }
 
-    // Verifikasi session cookie menggunakan Firebase Admin SDK
-    const decodedClaims = await getAuth().verifySessionCookie(sessionCookie, true);
-    const userRecord = await getAuth().getUser(decodedClaims.uid);
+//     // Verifikasi session cookie menggunakan Firebase Admin SDK
+//     const decodedClaims = await getAuth().verifySessionCookie(sessionCookie, true);
+//     const userRecord = await getAuth().getUser(decodedClaims.uid);
 
-    // Verifikasi role admin (opsional, jika diperlukan)
-    const db = getDatabase();
-    const adminRef = db.ref(`admin/${userRecord.uid}`);
-    const adminSnapshot = await adminRef.once('value');
+//     // Verifikasi role admin (opsional, jika diperlukan)
+//     const db = getDatabase();
+//     const adminRef = db.ref(`admin/${userRecord.uid}`);
+//     const adminSnapshot = await adminRef.once('value');
 
-    if (!adminSnapshot.exists() || adminSnapshot.val().role !== 'admin') {
-      // Redirect ke route /403
-      return res.redirect('/403');
-    }
+//     if (!adminSnapshot.exists() || adminSnapshot.val().role !== 'admin') {
+//       // Redirect ke route /403
+//       return res.redirect('/403');
+//     }
 
-    // Jika verifikasi berhasil, lanjutkan ke endpoint
-    req.user = userRecord;
-    next();
-  } catch (error) {
-    console.error('Error verifying session cookie:', error);
-    // Redirect ke route /403
-    res.redirect('/403');
-  }
-};
-app.get('/firebase', protectFirebaseConfig, (req, res) => {
+//     // Jika verifikasi berhasil, lanjutkan ke endpoint
+//     req.user = userRecord;
+//     next();
+//   } catch (error) {
+//     console.error('Error verifying session cookie:', error);
+//     // Redirect ke route /403
+//     res.redirect('/403');
+//   }
+// };
+app.get('/firebase', (req, res) => {
   const firebaseConfig = {
     apiKey: process.env.FIREBASE_API_KEY,
     authDomain: process.env.FIREBASE_AUTH_DOMAIN,

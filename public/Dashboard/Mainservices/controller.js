@@ -1,11 +1,12 @@
 // Import Firebase (tanpa Storage)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
 import { getDatabase, ref, push, set, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
+import { getAuth} from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
 
 // Initialize Firebase dengan fetch config dari server
 let firebaseApp;
 let database;
-
+let auth
 async function initializeFirebase() {
   try {
     const response = await fetch('/firebase');
@@ -13,6 +14,7 @@ async function initializeFirebase() {
     
     firebaseApp = initializeApp(firebaseConfig);
     database = getDatabase(firebaseApp);
+    auth = getAuth(firebaseApp);
     
     // Setelah Firebase diinisialisasi, load data program
     loadPrograms();

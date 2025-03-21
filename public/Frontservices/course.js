@@ -88,8 +88,13 @@ card.innerHTML = `
         courseFetchContainer.appendChild(card);
       });
     } else {
-      // Tampilkan pesan jika tidak ada data
-      courseFetchContainer.innerHTML = '<div class="text-center py-8 text-gray-500">Tidak ada data program.</div>';
+        const containerContent = document.querySelector('.courses-container'); // Ambil elemen dengan class container-content
+  
+    // Tampilkan pesan error  
+    // Tambahkan class 'hidden' ke container-content jika tidak ada data
+    if (containerContent) {
+      containerContent.classList.add('hidden');
+    }
     }
   }, (error) => {
     console.error("Error loading programs:", error);

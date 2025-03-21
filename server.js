@@ -282,6 +282,13 @@ app.use(express.static(path.join(__dirname, 'public'), {
 app.get('/403', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', '403.html'));
 });
+// app.get('/signup', (req, res) => {
+//   res.redirect('/Auth/signup');
+// });
+// app.get('/Auth/signup', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public/Auth', 'signup.html'));
+// });
+// sign route
 app.get('/sign', (req, res) => {
   res.redirect('/Auth/sign');
 });

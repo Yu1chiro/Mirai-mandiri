@@ -1,17 +1,18 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
 import { getDatabase, ref, push, set, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
 
 // Initialize Firebase
 let firebaseApp;
 let database;
-
+let auth; 
 async function initializeFirebase() {
   try {
     const response = await fetch('/firebase');
     const firebaseConfig = await response.json();
     firebaseApp = initializeApp(firebaseConfig);
     database = getDatabase(firebaseApp);
-    console.log("Firebase initialized successfully!");
+    auth = getAuth(firebaseApp);
 
     // Setelah Firebase diinisialisasi, jalankan fungsi-fungsi yang membutuhkan Firebase
     setupEventListeners();
@@ -35,7 +36,7 @@ function setupEventListeners() {
 
     <div class="space-y-2">
         <label for="thumbnail-tutor" class="block text-start text-sm font-medium text-gray-700">Thumbnail Tutor (URL Gambar)</label>
-        <input id="thumbnail-tutor" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan URL Gambar">
+        <input id="thumbnail-tutor" type="link" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan URL Gambar">
     </div>
 
     <div class="space-y-2">
@@ -76,13 +77,27 @@ function setupEventListeners() {
         const status = document.getElementById('status-tutor').value;
         const sertifikasi = document.getElementById('sertifikasi-tutor').value;
         const bidangMapel = document.getElementById('bidang-mapel').value;
-
-        if (!nama || !thumbnail || !status || !sertifikasi || !bidangMapel) {
-          Swal.showValidationMessage('Semua field harus diisi');
-          return false;
+       // Ekstrak ID dari link Google Drive
+        const thumbnailId = extractGoogleDriveId(thumbnail);
+        // Validasi link Google Drive
+        if (!thumbnailId) {
+            Swal.showValidationMessage('Link Google Drive tidak valid');
+            return false; // Hentikan proses jika link tidak valid
         }
 
-        return { nama, thumbnail, status, sertifikasi, bidangMapel };
+
+            if (!nama || !thumbnail || !status || !sertifikasi || !bidangMapel) {
+                Swal.showValidationMessage('Semua field harus diisi');
+                return false;
+            }
+
+            return {
+                nama,
+                thumbnail: thumbnailId, // Simpan ID-nya saja, bukan link lengkap
+                status,
+                sertifikasi,
+                bidangMapel
+            };
       }
     }).then((result) => {
       if (result.isConfirmed) {
@@ -92,7 +107,20 @@ function setupEventListeners() {
     });
   });
 }
-
+function extractGoogleDriveId(url) {
+    // Regex untuk mengekstrak ID dari berbagai format link Google Drive
+    const regex = /\/file\/d\/([a-zA-Z0-9_-]+)|id=([a-zA-Z0-9_-]+)|uc\?export=view&id=([a-zA-Z0-9_-]+)/;
+    const match = url.match(regex);
+  
+    // Jika ID ditemukan, kembalikan ID-nya
+    if (match) {
+      // ID bisa berada di grup 1, 2, atau 3 tergantung format link
+      return match[1] || match[2] || match[3];
+    }
+  
+    // Jika tidak ditemukan, kembalikan null
+    return null;
+  }
 // Fungsi untuk menambahkan data tutor ke Realtime Database
 function addTutorToDatabase(tutorData) {
   const tutorRef = ref(database, 'tutor-list');
@@ -124,7 +152,7 @@ function fetchTutors() {
         const row = `
           <tr class="hover:bg-gray-50">
             <td class="px-6 py-4">${tutor.nama}</td>
-            <td class="px-6 py-4"><img src="${tutor.thumbnail}" alt="Thumbnail" class="w-12 h-12 rounded-lg"></td>
+            <td class="px-6 py-4"><img src="/image/${tutor.thumbnail}" alt="Thumbnail" class="w-12 h-12 rounded-lg"></td>
             <td class="px-6 py-4">${tutor.status}</td>
             <td class="px-6 py-4">${tutor.sertifikasi}</td>
             <td class="px-6 py-4">${tutor.bidangMapel}</td>
@@ -206,13 +234,27 @@ window.editTutor = (tutorId) => {
           const status = document.getElementById('edit-status-tutor').value;
           const sertifikasi = document.getElementById('edit-sertifikasi-tutor').value;
           const bidangMapel = document.getElementById('edit-bidang-mapel').value;
+             // Ekstrak ID dari link Google Drive
+             const thumbnailId = extractGoogleDriveId(thumbnail);
+        // Validasi link Google Drive
+        if (!thumbnailId) {
+            Swal.showValidationMessage('Link Google Drive tidak valid');
+            return false; // Hentikan proses jika link tidak valid
+        }
+
 
           if (!nama || !thumbnail || !status || !sertifikasi || !bidangMapel) {
             Swal.showValidationMessage('Semua field harus diisi');
             return false;
           }
 
-          return { nama, thumbnail, status, sertifikasi, bidangMapel };
+          return {
+            nama,
+            thumbnail: thumbnailId, // Simpan ID-nya saja, bukan link lengkap
+            status,
+            sertifikasi,
+            bidangMapel
+          };
         }
       }).then((result) => {
         if (result.isConfirmed) {

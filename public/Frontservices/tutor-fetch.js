@@ -48,7 +48,7 @@ function fetchTutors() {
         const card = `
         <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-100">
  <div class="relative">
-   <img src="${tutor.thumbnail}" alt="${tutor.nama}" class="w-full h-52 object-cover">
+   <img src="/image/${tutor.thumbnail}" alt="${tutor.nama}" class="w-full h-52 object-cover">
    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
      <span class="inline-block px-3 py-1 text-sm font-semibold text-white bg-yellow-600 rounded-full">${tutor.status}</span>
    </div>
@@ -73,7 +73,11 @@ function fetchTutors() {
         tutorListContainer.innerHTML += card; // Tambahkan card ke container
       });
     } else {
-      tutorListContainer.innerHTML = '<p class="text-center text-gray-600">Tidak ada data tutor.</p>';
+            const containerContent = document.querySelector('.tutor-content'); // Ambil elemen dengan class container-content
+            // Tambahkan class 'hidden' ke container-content jika tidak ada data
+            if (containerContent) {
+              containerContent.classList.add('hidden');
+            }   
     }
   });
 }

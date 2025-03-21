@@ -71,12 +71,11 @@ function renderTable(testimonials) {
     row.innerHTML = `
       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${testimonial.name || '-'}</td>
       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-        <img src="${testimonial.thumbnail || 'https://via.placeholder.com/40'}" alt="Thumbnail" class="w-10 h-10 rounded-full">
+        <img src="/image/${testimonial.thumbnail || 'https://via.placeholder.com/40'}" alt="Thumbnail" class="w-10 h-10 rounded-full">
       </td>
       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${testimonial.bidang || '-'}</td>
       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${testimonial.lokasi || '-'}</td>
       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${testimonial.tahun || '-'}</td>
-      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${testimonial.pesan || '-'}</td>
       <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
         <button onclick="approveTestimonial('${testimonial.id}')" class="text-green-600 hover:text-green-900">Approve</button>
         <button onclick="removeTestimonial('${testimonial.id}')" class="text-red-600 hover:text-red-900 ml-2">Remove</button>
@@ -117,7 +116,7 @@ function openDetailModal(testimonial) {
     <h2 class="text-xl font-bold mb-4">Detail Testimonial</h2>
     <div class="space-y-4">
       <p><strong>Nama:</strong> ${testimonial.name || '-'}</p>
-      <p><strong>Thumbnail:</strong> <img src="${testimonial.thumbnail || 'https://via.placeholder.com/40'}" alt="Thumbnail" class="w-10 h-10 rounded-full"></p>
+      <p><strong>Thumbnail:</strong> <img src="/image/${testimonial.thumbnail || 'https://via.placeholder.com/40'}" alt="Thumbnail" class="w-10 h-10 rounded-full"></p>
       <p><strong>Bidang:</strong> ${testimonial.bidang || '-'}</p>
       <p><strong>Lokasi:</strong> ${testimonial.lokasi || '-'}</p>
       <p><strong>Tahun:</strong> ${testimonial.tahun || '-'}</p>

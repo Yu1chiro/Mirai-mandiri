@@ -59,7 +59,12 @@ function renderApprovedCards(testimonials) {
   cardContainer.innerHTML = ''; // Kosongkan container sebelum mengisi ulang
 
   if (testimonials.length === 0) {
-    cardContainer.innerHTML = `<p class="text-gray-500 text-center">Belum ada data.</p>`;
+    const containerContent = document.querySelector('.alumni-content'); // Ambil elemen dengan class container-content
+    // Tambahkan class 'hidden' ke container-content jika tidak ada data
+    if (containerContent) {
+      containerContent.classList.add('hidden');
+    }   
+
     return;
   }
 
@@ -67,7 +72,7 @@ function renderApprovedCards(testimonials) {
     const card = document.createElement('div');
     card.className = 'bg-white rounded-lg shadow-lg overflow-hidden';
     card.innerHTML = `
-      <img src="${testimonial.thumbnail || 'https://via.placeholder.com/300'}" alt="Alumni Image" class="w-full h-48 object-cover">
+      <img src="/image/${testimonial.thumbnail || 'https://via.placeholder.com/300'}" alt="Alumni Image" class="w-full h-48 object-cover">
       <div class="p-6">
         <h3 class="text-lg font-semibold text-gray-800">${testimonial.name || 'Nama Alumni'}</h3>
         <p class="text-sm text-gray-600 mt-2">

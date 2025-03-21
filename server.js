@@ -8,6 +8,7 @@ import { getDatabase } from 'firebase-admin/database';
 import {rateLimit} from 'express-rate-limit';
 import {RateLimiterMemory} from 'rate-limiter-flexible';
 import { body, validationResult } from 'express-validator';
+import axios from "axios";
 
 dotenv.config();
 const app = express();
@@ -132,6 +133,18 @@ app.get('/auth-config', (req, res) => {
   };
 
   res.json(firebaseClientConfig);
+});
+app.get("/image/:id", async (req, res) => {
+  const fileId = req.params.id;
+  const imageUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+
+  try {
+      const response = await axios.get(imageUrl, { responseType: "stream" });
+      res.setHeader("Content-Type", response.headers["content-type"]);
+      response.data.pipe(res);
+  } catch (error) {
+      res.status(500).send("Gambar tidak dapat di-load.");
+  }
 });
 
 // Konfigurasi rate-limiting
@@ -301,7 +314,15 @@ app.get('/admin', authMiddleware, (req, res) => {
 app.get('/Dashboard/admin', authMiddleware, (req, res) => {
   res.sendFile(path.join(__dirname, 'public/Dashboard', 'admin.html'));
 });
-// 
+// news
+app.get('/news', authMiddleware, (req, res) => {
+  res.redirect('/Dashboard/news');
+});
+
+app.get('/Dashboard/news', authMiddleware, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/Dashboard', 'news.html'));
+});
+// testimonial
 app.get('/testimoni-manage', authMiddleware, (req, res) => {
   res.redirect('/Dashboard/testimoni-manage');
 });

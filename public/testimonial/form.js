@@ -42,10 +42,16 @@ async function handleFormSubmit(event) {
   const lokasi = formData.get('lokasi');
   const tahun = formData.get('tahun');
   const pesan = formData.get('pesan');
+  const thumbnailId = extractGoogleDriveId(thumbnail);
+  // Validasi link Google Drive
+  if (!thumbnailId) {
+      Swal.showValidationMessage('Link Google Drive tidak valid');
+      return false; // Hentikan proses jika link tidak valid
+  }
 
   const testimonialData = {
     name,
-    thumbnail,
+    thumbnail: thumbnailId,
     bidang,
     lokasi,
     tahun,
@@ -77,7 +83,20 @@ async function handleFormSubmit(event) {
     hideLoading();
   }
 }
-
+function extractGoogleDriveId(url) {
+    // Regex untuk mengekstrak ID dari berbagai format link Google Drive
+    const regex = /\/file\/d\/([a-zA-Z0-9_-]+)|id=([a-zA-Z0-9_-]+)|uc\?export=view&id=([a-zA-Z0-9_-]+)/;
+    const match = url.match(regex);
+  
+    // Jika ID ditemukan, kembalikan ID-nya
+    if (match) {
+      // ID bisa berada di grup 1, 2, atau 3 tergantung format link
+      return match[1] || match[2] || match[3];
+    }
+  
+    // Jika tidak ditemukan, kembalikan null
+    return null;
+  }
 // Fungsi untuk menampilkan loading overlay
 function showLoading() {
   const loadingOverlay = document.createElement('div');
